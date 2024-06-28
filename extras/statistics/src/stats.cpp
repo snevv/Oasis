@@ -52,6 +52,59 @@ public:
         return max(col) - min(col);
     }
 
+    auto variance(size_t col) const {
+        T mean_value = mean(col);
+        auto data = getColumnData(col);
+        T var = std::accumulate(data.begin(), data.end(), T(0), [mean_value](T sum, T value) {
+            return sum + (value - mean_value) * (value - mean_value);
+        });
+        return var / data.size();
+    }
+
+    auto stddev(size_t col) const {
+        return std::sqrt(variance(col));
+    }
+
+    // std::map<T, size_t> mode(size_t col) const {
+        
+    // }
+
+    auto skew(size_t col) const {
+        T mean_value = mean(col);
+        T stddev_value = stddev(col);
+        auto data = getColumnData(col);
+        T skewness = std::accumulate(data.begin(), data.end(), T(0), [mean_value, stddev_value](T sum, T value) {
+            return sum + std::pow((value - mean_value) / stddev_value, 3);
+        });
+        return skewness / data.size();
+    }
+
+    auto kurtosis(size_t col) const {
+        // ...
+    }
+
+    // FOR TESTING
+    auto summary(size_t col) const {
+        std::cout << "Summary for column " << col << ":\n";
+        std::cout << "Count: " << count(col) << "\n";
+        std::cout << "Mean: " << mean(col) << "\n";
+        std::cout << "Median: " << median(col) << "\n";
+        std::cout << "Sum: " << sum(col) << "\n";
+        std::cout << "Max: " << max(col) << "\n";
+        std::cout << "Min: " << min(col) << "\n";
+        std::cout << "Range: " << range(col) << "\n";
+        std::cout << "Variance: " << variance(col) << "\n";
+        std::cout << "Standard Deviation: " << stddev(col) << "\n";
+        std::cout << "Skewness: " << skew(col) << "\n";
+        std::cout << "Kurtosis: " << kurtosis(col) << "\n";
+        auto modes = mode(col);
+        std::cout << "Mode: ";
+        for (const auto& [value, count] : modes) {
+            std::cout << value << " (count: " << count << "), ";
+        }
+        std::cout << "\n";
+    }
+
 private:
     const Table<T>& table;
 
