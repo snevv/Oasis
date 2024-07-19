@@ -1,4 +1,5 @@
-#include "Oasis/table.hpp"
+#include "stats.hpp"
+#include "table.cpp"
 #include <vector>
 #include <numeric>
 #include <algorithm>
@@ -7,18 +8,15 @@
 
 namespace Oasis {
 
-template <typename T>
-class Stats {
-public:
-    explicit Stats(const Table<T>& table) : table(table) {}
-
-    auto mean(size_t col) const {
+    template <typename T>
+    auto Stats<T>::mean(size_t col) const {
         auto data = getColumnData(col);
         T sum = std::accumulate(data.begin(), data.end(), T(0));
         return sum / data.size();
     }
 
-    auto median(size_t col) const {
+    template <typename T>
+    auto Stats<T>::median(size_t col) const {
         auto data = getColumnData(col);
         std::sort(data.begin(), data.end());
         size_t n = data.size();
@@ -29,30 +27,36 @@ public:
         }
     }
 
-    auto sum(size_t col) const {
+    template <typename T>
+    auto Stats<T>::sum(size_t col) const {
         auto data = getColumnData(col);
         return std::accumulate(data.begin(), data.end(), T(0));
     }
 
-    auto count(size_t col) const {
+    template <typename T>
+    auto Stats<T>::count(size_t col) const {
         return table.getRowCount(col);
     }
 
-    auto max(size_t col) const {
+    template <typename T>
+    auto Stats<T>::max(size_t col) const {
         auto data = getColumnData(col);
         return *std::max_element(data.begin(), data.end());
     }
 
-    auto min(size_t col) const {
+    template <typename T>
+    auto Stats<T>::min(size_t col) const {
         auto data = getColumnData(col);
         return *std::min_element(data.begin(), data.end());
     }
 
-    auto range(size_t col) const {
+    template <typename T>
+    auto Stats<T>::range(size_t col) const {
         return max(col) - min(col);
     }
 
-    auto variance(size_t col) const {
+    template <typename T>
+    auto Stats<T>::variance(size_t col) const {
         T mean_value = mean(col);
         auto data = getColumnData(col);
         T var = std::accumulate(data.begin(), data.end(), T(0), [mean_value](T sum, T value) {
@@ -61,15 +65,18 @@ public:
         return var / data.size();
     }
 
-    auto stddev(size_t col) const {
+    template <typename T>
+    auto Stats<T>::stddev(size_t col) const {
         return std::sqrt(variance(col));
     }
 
-    // std::map<T, size_t> mode(size_t col) const {
-        
-    // }
+    template <typename T>
+    std::vector<T> Stats<T>::mode(size_t col) const {
+        // ...
+    }
 
-    auto skew(size_t col) const {
+    template <typename T>
+    auto Stats<T>::skew(size_t col) const {
         T mean_value = mean(col);
         T stddev_value = stddev(col);
         auto data = getColumnData(col);
@@ -79,12 +86,14 @@ public:
         return skewness / data.size();
     }
 
-    auto kurtosis(size_t col) const {
+    template <typename T>
+    auto Stats<T>::kurtosis(size_t col) const {
         // ...
     }
 
     // FOR TESTING
-    auto summary(size_t col) const {
+    template <typename T>
+    void Stats<T>::summary(size_t col) const {
         std::cout << "Summary for column " << col << ":\n";
         std::cout << "Count: " << count(col) << "\n";
         std::cout << "Mean: " << mean(col) << "\n";
@@ -105,19 +114,14 @@ public:
         std::cout << "\n";
     }
 
-private:
-    const Table<T>& table;
-
-    std::vector<T> getColumnData(size_t col) const {
-        size_t rowCount = table.getRowCount(col);
+    template <typename T>
+    std::vector<T> Stats<T>::getColumnData(size_t col) const {
+        size_t rowCount = table.getColSize(col);
         std::vector<T> data(rowCount);
         for (size_t row = 0; row < rowCount; ++row) {
             data[row] = table.get(col, row);
         }
         return data;
     }
-};
 
 } // namespace Oasis
-
-#endif 
