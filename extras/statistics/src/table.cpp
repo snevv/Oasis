@@ -8,32 +8,15 @@
 
 namespace Oasis {
 
-template <typename T>
-class Table;
-
-template <typename T>
-class TableInitializer {
-public:
-    TableInitializer(Table<T>* table) : table(table) {}
-
-    void populate(const std::vector<std::vector<T>>& data) {
+    template <typename T>
+    void TableInitializer<T>::populate() {
         if (table) {
             table->setData(data);
         }
     }
 
-private:
-    Table<T>* table;
-};
-
-template <typename T>
-class Table {
-public:
-    virtual ~Table() = default;
-
-    [[nodiscard]] virtual auto Copy() const -> std::unique_ptr<Table> = 0;
-
-    void setData(const std::vector<std::vector<T>>& data) {
+    template <typename T>
+    void Table<T>::setData(const std::vector<std::vector<T>>& data) {
         size_t total_size = 0;
         for (const auto& column : data) {
             total_size += column.size();
@@ -52,7 +35,8 @@ public:
         }
     }
 
-    T get(size_t col, size_t row) const {
+    template <typename T>
+    T Table<T>::get(size_t col, size_t row) const {
         if (col >= col_sizes.size()) {
             throw std::out_of_range("Column index out of range");
         }
@@ -69,18 +53,28 @@ public:
         return values[start_index + row];
     }
 
-    size_t getRowCount(size_t col) const {
+    template <typename T>
+    size_t Table<T>::getColSize(size_t col) const {
         if (col >= col_sizes.size()) {
             throw std::out_of_range("Column index out of range");
         }
         return col_sizes[col];
     }
 
-private:
-    std::vector<T> values; 
+    template <typename T>
+    std::vector<T> Table<T>::getColumnData(size_t col) const {
+        if (col >= width) {
+            throw std::out_of_range("Column index out of range");
+        }
 
-};
+        size_t offset = 0;
+        for (size_t i = 0; i < col; ++i) {
+            offset += col_sizes[i];
+        }
 
+        return std::vector<T>(values.begin() + offset, values.begin() + offset + col_sizes[col]);
+    }
+    
 } // namespace Oasis
 
 
