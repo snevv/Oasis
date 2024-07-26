@@ -2,6 +2,7 @@
 #include "table.cpp"
 #include "stats.cpp"
 #include "catch2/catch_test_macros.hpp"
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 TEST_CASE("Mean (normal)", "[Stats]") {
     std::vector<std::vector<int>> data = { {1, 2, 3} };
@@ -133,15 +134,15 @@ TEST_CASE("Max (duplicates)", "[Stats]") {
     REQUIRE(stats.max(0) == 5);
 }
 
-// TEST_CASE("Max (empty)", "[Stats]") {
-//     std::vector<std::vector<int>> data = { {} };
+TEST_CASE("Max (empty)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {} };
 
-//     Oasis::Table<int> table;
-//     table.setData(data);
-//     Oasis::Stats<int> stats(table);
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
 
-//     REQUIRE(stats.max(0) == 5);
-// }
+    REQUIRE(stats.max(0) == NULL);
+}
 
 TEST_CASE("Min (normal)", "[Stats]") {
     std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5} };
@@ -163,15 +164,15 @@ TEST_CASE("Min (duplicates)", "[Stats]") {
     REQUIRE(stats.min(0) == 1);
 }
 
-// TEST_CASE("Min (empty)", "[Stats]") {
-//     std::vector<std::vector<int>> data = { {} };
+TEST_CASE("Min (empty)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {} };
 
-//     Oasis::Table<int> table;
-//     table.setData(data);
-//     Oasis::Stats<int> stats(table);
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
 
-//     REQUIRE(stats.min(0) == 5);
-// }
+    REQUIRE(stats.min(0) == NULL);
+}
 
 TEST_CASE("Range (normal)", "[Stats]") {
     std::vector<std::vector<int>> data = { {3, 1, 2, 5, 4} };
@@ -203,12 +204,133 @@ TEST_CASE("Range (single)", "[Stats]") {
     REQUIRE(stats.range(0) == 0);
 }
 
-// TEST_CASE("Range (empty)", "[Stats]") {
-//     std::vector<std::vector<int>> data = { {} };
+TEST_CASE("Range (empty)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {} };
 
-//     Oasis::Table<int> table;
-//     table.setData(data);
-//     Oasis::Stats<int> stats(table);
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
 
-//     REQUIRE(stats.range(0) == 0);
-// }
+    REQUIRE(stats.range(0) == NULL);
+}
+
+TEST_CASE("Variance (simple)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.variance(0) == 2.5);
+}
+
+TEST_CASE("Variance (single)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.variance(0) == 0);
+}
+
+TEST_CASE("Variance (repeated values)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 7, 7, 7, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE_THAT(stats.variance(0), Catch::Matchers::WithinAbs(2.5, 0.01));
+}
+
+TEST_CASE("Variance (floats)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1.1, 2.2, 3.3, 4.4, 5.5} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.variance(0), Catch::Matchers::WithinAbs(2.97, 0.01));
+    
+}
+
+TEST_CASE("Variance (mixed)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2.5, 3, 4.5, 5} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.variance(0), Catch::Matchers::WithinAbs(2.75, 0.01));
+}
+
+TEST_CASE("Variance (mixed)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2.5, 3, 4.5, 5} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.variance(0), Catch::Matchers::WithinAbs(2.75, 0.01));
+}
+
+TEST_CASE("Standard Deviation (empty)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE(stats.stddev(0) == NULL);
+}
+
+TEST_CASE("Standard Deviation (repeated values)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 7, 7, 7, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE_THAT(stats.stddev(0), Catch::Matchers::WithinAbs(0.0, 0.01));
+}
+
+TEST_CASE("Standard Deviation (floats)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1.1, 2.2, 3.3, 4.4, 5.5} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.stddev(0), Catch::Matchers::WithinAbs(1.72, 0.01));
+}
+
+TEST_CASE("Standard Deviation (mixed)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2.5, 3, 4.5, 5} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.stddev(0), Catch::Matchers::WithinAbs(1.66, 0.01));
+}
+
+TEST_CASE("Skew (empty)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE(stats.skew(0) == NULL);
+}
+
+TEST_CASE("Skew (all equal values)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1.0, 1.0, 1.0} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(0.0, 0.001));
+}

@@ -38,7 +38,7 @@ namespace Oasis {
     template <typename T>
     T Table<T>::get(size_t col, size_t row) const {
         if (col >= col_sizes.size()) {
-            throw std::out_of_range("Column index out of range");
+            throw std::out_of_range("co index out of range");
         }
 
         size_t start_index = 0;
@@ -47,7 +47,7 @@ namespace Oasis {
         }
 
         if (row >= col_sizes[col]) {
-            throw std::out_of_range("Row index out of range");
+            throw std::out_of_range("col index out of range");
         }
 
         return values[start_index + row];
@@ -56,25 +56,11 @@ namespace Oasis {
     template <typename T>
     size_t Table<T>::getColSize(size_t col) const {
         if (col >= col_sizes.size()) {
-            throw std::out_of_range("Column index out of range");
+            throw std::out_of_range("col index out of range");
         }
         return col_sizes[col];
     }
 
-    template <typename T>
-    std::vector<T> Table<T>::getColumnData(size_t col) const {
-        if (col >= width) {
-            throw std::out_of_range("Column index out of range");
-        }
-
-        size_t offset = 0;
-        for (size_t i = 0; i < col; ++i) {
-            offset += col_sizes[i];
-        }
-
-        return std::vector<T>(values.begin() + offset, values.begin() + offset + col_sizes[col]);
-    }
-    
 } // namespace Oasis
 
 

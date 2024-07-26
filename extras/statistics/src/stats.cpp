@@ -18,10 +18,10 @@ namespace Oasis {
     template <typename T>
     auto Stats<T>::median(size_t col) const {
         auto data = getColumnData(col);
-        std::sort(data.begin(), data.end());
-        size_t n = data.size();
+        std::vector<int> temp = std::sort(data.begin(), data.end());
+        size_t n = temp.size();
         if (n % 2 == 0) {
-            return (data[n / 2 - 1] + data[n / 2]) / T(2);
+            return (temp[n / 2 - 1] + data[n / 2]) / 2.0;
         } else {
             return data[n / 2];
         }
@@ -41,17 +41,20 @@ namespace Oasis {
     template <typename T>
     auto Stats<T>::max(size_t col) const {
         auto data = getColumnData(col);
+        if( data.empty() ) return NULL;
         return *std::max_element(data.begin(), data.end());
     }
 
     template <typename T>
     auto Stats<T>::min(size_t col) const {
         auto data = getColumnData(col);
+        if( data.empty() ) return NULL;
         return *std::min_element(data.begin(), data.end());
     }
 
     template <typename T>
     auto Stats<T>::range(size_t col) const {
+        if( max(col) == NULL || min(col) == NULL ) return NULL
         return max(col) - min(col);
     }
 
@@ -59,6 +62,7 @@ namespace Oasis {
     auto Stats<T>::variance(size_t col) const {
         T mean_value = mean(col);
         auto data = getColumnData(col);
+        if( data.empty() ) return NULL;
         T var = std::accumulate(data.begin(), data.end(), T(0), [mean_value](T sum, T value) {
             return sum + (value - mean_value) * (value - mean_value);
         });
@@ -80,6 +84,7 @@ namespace Oasis {
         T mean_value = mean(col);
         T stddev_value = stddev(col);
         auto data = getColumnData(col);
+        if( data.empty() ) return NULL;
         T skewness = std::accumulate(data.begin(), data.end(), T(0), [mean_value, stddev_value](T sum, T value) {
             return sum + std::pow((value - mean_value) / stddev_value, 3);
         });
