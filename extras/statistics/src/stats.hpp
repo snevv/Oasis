@@ -57,6 +57,20 @@ public:
 
     [[nodiscard]] auto upper_quartile(size_t col) const;
 
+    [[nodiscard]] std::pair<double, double> confidence_interval_mean(size_t col, double confidence_level) const;
+
+    [[nodiscard]] std::pair<double, double> confidence_interval_proportion(size_t col, double confidence_level) const;
+
+    [[nodiscard]] double z_test(size_t col, double population_mean) const;
+
+    [[nodiscard]] double t_test(size_t col, double population_mean) const;
+
+    [[nodiscard]] double one_way_anova(const std::vector<size_t>& groups) const;
+
+    [[nodiscard]] double chi_square_test_independence(const std::vector<size_t>& row_groups, const std::vector<size_t>& col_groups) const;
+
+    [[nodiscard]] double chi_square_goodness_of_fit(const std::vector<double>& expected_frequencies) const;
+
     void summary(size_t col) const;
 
 private:

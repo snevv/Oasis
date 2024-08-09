@@ -384,3 +384,93 @@ TEST_CASE("Skew (skew left)", "[Stats]") {
 
 //     REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(-0.3126, 0.01));
 // }
+
+TEST_CASE("Upper Quartile (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.upper_quartile(0) == 6);
+}
+
+TEST_CASE("Upper Quartile (scrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.upper_quartile(0) == 6);
+}
+
+TEST_CASE("Upper Quartile (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.upper_quartile(0) == 6);
+}
+
+TEST_CASE("Lower Quartile (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.lower_quartile(0) == 3);
+}
+
+TEST_CASE("Lower Quartile (scrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.lower_quartile(0) == 3);
+}
+
+TEST_CASE("Lower Quartile (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.lower_quartile(0) == 2.5);
+}
+
+TEST_CASE("Interquartile Range (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.iqr(0) == 3);
+}
+
+TEST_CASE("Interquartile Range (scrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.iqr(0) == 3);
+}
+
+TEST_CASE("Interquartile Range (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.iqr(0) == 3.5);
+}
