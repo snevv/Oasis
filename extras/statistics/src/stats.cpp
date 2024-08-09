@@ -4,7 +4,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cmath>
-#include <map>
+#include <unordered_map>
 
 namespace Oasis {
 
@@ -18,10 +18,10 @@ namespace Oasis {
     template <typename T>
     auto Stats<T>::median(size_t col) const {
         auto data = getColumnData(col);
-        std::vector<int> temp = std::sort(data.begin(), data.end());
-        size_t n = temp.size();
+        data = std::sort(data.begin(), data.end());
+        size_t n = data.size();
         if (n % 2 == 0) {
-            return (temp[n / 2 - 1] + data[n / 2]) / 2.0;
+            return (data[n / 2 - 1] + data[n / 2]) / 2.0;
         } else {
             return data[n / 2];
         }
@@ -76,10 +76,26 @@ namespace Oasis {
 
     template <typename T>
     std::vector<T> Stats<T>::mode(size_t col) const {
-        // ...
+        auto data = getColumnData(col);
+        if (data.empty()) { return {}; }
+        
+        std::unordered_map<T, int> frequency;
+        for (const auto& value : data) { ++frequency[value]; }
+        
+        int maxCount = 0;
+        for (const auto& pair : frequency) {
+            if (pair.second > maxCount) { maxCount = pair.second; }
+        }
+
+        std::vector<T> modes;
+        for (const auto& pair : frequency) {
+            if (pair.second == maxCount) { modes.push_back(pair.first); }
+        }
+        
+        return modes;
     }
 
-    template <typename T>
+    template <typename T> // Fisher-Pearson coefficient of skewness (maybe implement other measures of skew?)
     auto Stats<T>::skew(size_t col) const {
         T mean_value = mean(col);
         T stddev_value = stddev(col);
@@ -93,6 +109,51 @@ namespace Oasis {
 
     template <typename T>
     auto Stats<T>::kurtosis(size_t col) const {
+        // ...
+    }
+
+    template <typename T>
+    auto Stats<T>::coefficient_variation(size_t col) const {
+        return ( stddev(col) / mean(col) ) * 100;
+    }
+
+    template <typename T>
+    auto Stats<T>::lower_quartile(size_t col) const {
+        auto data = getColumnData(col);
+        std::sort(data.begin(), data.end());
+        size_t n = data.size();
+        size_t mid_index = n / 2;
+        std::vector<T> lower_half(data.begin(), data.begin() + mid_index);
+
+        if (lower_half.size() % 2 == 0) {
+            return (lower_half[lower_half.size() / 2 - 1] + lower_half[lower_half.size() / 2]) / 2.0;
+        } else {
+            return lower_half[lower_half.size() / 2];
+        }
+    }
+
+    template <typename T>
+    auto Stats<T>::upper_quartile(size_t col) const {
+        auto data = getColumnData(col);
+        std::sort(data.begin(), data.end());
+        size_t n = data.size();
+        size_t mid_index = (n % 2 == 0) ? n / 2 : (n / 2 + 1);
+        std::vector<T> upper_half(data.begin() + mid_index, data.end());
+
+        if (upper_half.size() % 2 == 0) {
+            return (upper_half[upper_half.size() / 2 - 1] + upper_half[upper_half.size() / 2]) / 2.0;
+        } else {
+            return upper_half[upper_half.size() / 2];
+        }
+    }
+
+    template <typename T>
+    auto Stats<T>::iqr(size_t col) const {
+        return upper_quartile(col) - lower_quartile(col);
+    }
+
+    template <typename T>
+    auto Stats<T>::z_score(size_t col) const {
         // ...
     }
 
@@ -110,12 +171,15 @@ namespace Oasis {
         std::cout << "Variance: " << variance(col) << "\n";
         std::cout << "Standard Deviation: " << stddev(col) << "\n";
         std::cout << "Skewness: " << skew(col) << "\n";
-        std::cout << "Kurtosis: " << kurtosis(col) << "\n";
-        auto modes = mode(col);
-        std::cout << "Mode: ";
-        for (const auto& [value, count] : modes) {
-            std::cout << value << " (count: " << count << "), ";
-        }
+        std::cout << "Lower Quartile: " << lower_quartile(col) << "\n";
+        std::cout << "Upper Quartile: " << upper_quartile(col) << "\n";
+        std::cout << "Interquartile Range (IQR): " << iqr(col) << "\n";
+        // std::cout << "Kurtosis: " << kurtosis(col) << "\n";
+        // auto modes = mode(col);
+        // std::cout << "Mode: ";
+        // for (const auto& [value, count] : modes) {
+        //     std::cout << value << " (count: " << count << "), ";
+        // }
         std::cout << "\n";
     }
 

@@ -43,6 +43,20 @@ public:
 
     [[nodiscard]] auto kurtosis(size_t col) const;
 
+    [[nodiscard]] auto z_score(size_t col) const;
+
+    [[nodiscard]] auto iqr(size_t col) const;
+
+    [[nodiscard]] auto coefficient_variation(size_t col) const;
+
+    [[nodiscard]] auto lower_limit(size_t col) const;
+
+    [[nodiscard]] auto upper_limit(size_t col) const;
+
+    [[nodiscard]] auto lower_quartile(size_t col) const;
+
+    [[nodiscard]] auto upper_quartile(size_t col) const;
+
     void summary(size_t col) const;
 
 private:
