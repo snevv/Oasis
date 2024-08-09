@@ -43,7 +43,7 @@ public:
 
     [[nodiscard]] auto kurtosis(size_t col) const;
 
-    [[nodiscard]] auto z_score(size_t col) const;
+    [[nodiscard]] auto z_score(size_t col, T observed) const;
 
     [[nodiscard]] auto iqr(size_t col) const;
 

@@ -334,3 +334,53 @@ TEST_CASE("Skew (all equal values)", "[Stats]") {
 
     REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(0.0, 0.001));
 }
+
+TEST_CASE("Skew (symmetric)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1.0, 2.0, 3.0, 4.0, 5.0} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(0.0, 0.01));
+}
+
+TEST_CASE("Skew (skew right)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 1, 2, 2, 2, 3} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(0.3126, 0.01));
+}
+
+TEST_CASE("Skew (skew left)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2, 2, 2, 3, 3} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(-0.3126, 0.01));
+}
+
+// TEST_CASE("Skew (floats)", "[Stats]") {
+//     std::vector<std::vector<double>> data = { {1, 2, 2, 2, 3, 3} };
+
+//     Oasis::Table<double> table;
+//     table.setData(data);
+//     Oasis::Stats<double> stats(table);
+
+//     REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(-0.3126, 0.01));
+// }
+
+// TEST_CASE("Skew (mixed)", "[Stats]") {
+//     std::vector<std::vector<double>> data = { {1, 2, 2, 2, 3, 3} };
+
+//     Oasis::Table<double> table;
+//     table.setData(data);
+//     Oasis::Stats<double> stats(table);
+
+//     REQUIRE_THAT(stats.skew(0), Catch::Matchers::WithinAbs(-0.3126, 0.01));
+// }

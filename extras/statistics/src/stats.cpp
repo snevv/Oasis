@@ -1,8 +1,6 @@
 #include "stats.hpp"
-#include "table.cpp"
-#include <vector>
+#include <iostream>
 #include <numeric>
-#include <algorithm>
 #include <cmath>
 #include <unordered_map>
 
@@ -18,7 +16,7 @@ namespace Oasis {
     template <typename T>
     auto Stats<T>::median(size_t col) const {
         auto data = getColumnData(col);
-        data = std::sort(data.begin(), data.end());
+        std::sort(data.begin(), data.end());
         size_t n = data.size();
         if (n % 2 == 0) {
             return (data[n / 2 - 1] + data[n / 2]) / 2.0;
@@ -41,20 +39,23 @@ namespace Oasis {
     template <typename T>
     auto Stats<T>::max(size_t col) const {
         auto data = getColumnData(col);
-        if( data.empty() ) return NULL;
+        if (data.empty()) {
+            throw std::runtime_error("Column is empty");
+        }
         return *std::max_element(data.begin(), data.end());
     }
 
     template <typename T>
     auto Stats<T>::min(size_t col) const {
         auto data = getColumnData(col);
-        if( data.empty() ) return NULL;
+        if (data.empty()) {
+            throw std::runtime_error("Column is empty");
+        }
         return *std::min_element(data.begin(), data.end());
     }
 
     template <typename T>
     auto Stats<T>::range(size_t col) const {
-        if( max(col) == NULL || min(col) == NULL ) return NULL
         return max(col) - min(col);
     }
 
@@ -62,7 +63,9 @@ namespace Oasis {
     auto Stats<T>::variance(size_t col) const {
         T mean_value = mean(col);
         auto data = getColumnData(col);
-        if( data.empty() ) return NULL;
+        if (data.empty()) {
+            throw std::runtime_error("Column is empty");
+        }
         T var = std::accumulate(data.begin(), data.end(), T(0), [mean_value](T sum, T value) {
             return sum + (value - mean_value) * (value - mean_value);
         });
@@ -77,30 +80,40 @@ namespace Oasis {
     template <typename T>
     std::vector<T> Stats<T>::mode(size_t col) const {
         auto data = getColumnData(col);
-        if (data.empty()) { return {}; }
-        
+        if (data.empty()) {
+            return {};
+        }
+
         std::unordered_map<T, int> frequency;
-        for (const auto& value : data) { ++frequency[value]; }
-        
+        for (const auto &value : data) {
+            ++frequency[value];
+        }
+
         int maxCount = 0;
-        for (const auto& pair : frequency) {
-            if (pair.second > maxCount) { maxCount = pair.second; }
+        for (const auto &pair : frequency) {
+            if (pair.second > maxCount) {
+                maxCount = pair.second;
+            }
         }
 
         std::vector<T> modes;
-        for (const auto& pair : frequency) {
-            if (pair.second == maxCount) { modes.push_back(pair.first); }
+        for (const auto &pair : frequency) {
+            if (pair.second == maxCount) {
+                modes.push_back(pair.first);
+            }
         }
-        
+
         return modes;
     }
 
-    template <typename T> // Fisher-Pearson coefficient of skewness (maybe implement other measures of skew?)
+    template <typename T>
     auto Stats<T>::skew(size_t col) const {
         T mean_value = mean(col);
         T stddev_value = stddev(col);
         auto data = getColumnData(col);
-        if( data.empty() ) return NULL;
+        if (data.empty()) {
+            throw std::runtime_error("Column is empty");
+        }
         T skewness = std::accumulate(data.begin(), data.end(), T(0), [mean_value, stddev_value](T sum, T value) {
             return sum + std::pow((value - mean_value) / stddev_value, 3);
         });
@@ -109,12 +122,38 @@ namespace Oasis {
 
     template <typename T>
     auto Stats<T>::kurtosis(size_t col) const {
-        // ...
+        auto data = getColumnData(col);
+        if (data.empty()) {
+            throw std::runtime_error("Column is empty");
+        }
+
+        T mean_value = mean(col);
+        T stddev_value = stddev(col);
+        size_t N = data.size();
+
+        T kurt = std::accumulate(data.begin(), data.end(), T(0), [mean_value, stddev_value](T sum, T value) {
+            return sum + std::pow((value - mean_value) / stddev_value, 4);
+        });
+
+        T normalization_factor = N * (N + 1) / ((N - 1) * (N - 2) * (N - 3));
+        T excess_kurtosis = normalization_factor * kurt - 3 * std::pow(N - 1, 2) / ((N - 2) * (N - 3));
+
+        return excess_kurtosis;
+    }
+
+    template <typename T>
+    auto Stats<T>::z_score(size_t col, T observed) const {
+        T mean_value = mean(col);
+        T stddev_value = stddev(col);
+        if (stddev_value == 0) {
+            throw std::runtime_error("Standard deviation is zero, cannot calculate z-score.");
+        }
+        return (observed - mean_value) / stddev_value;
     }
 
     template <typename T>
     auto Stats<T>::coefficient_variation(size_t col) const {
-        return ( stddev(col) / mean(col) ) * 100;
+        return (stddev(col) / mean(col)) * 100;
     }
 
     template <typename T>
@@ -152,12 +191,18 @@ namespace Oasis {
         return upper_quartile(col) - lower_quartile(col);
     }
 
+    // Implementations for `lower_limit` and `upper_limit` if needed...
+
     template <typename T>
-    auto Stats<T>::z_score(size_t col) const {
-        // ...
+    std::vector<T> Stats<T>::getColumnData(size_t col) const {
+        size_t rowCount = table.getColSize(col);
+        std::vector<T> data(rowCount);
+        for (size_t row = 0; row < rowCount; ++row) {
+            data[row] = table.get(col, row);
+        }
+        return data;
     }
 
-    // FOR TESTING
     template <typename T>
     void Stats<T>::summary(size_t col) const {
         std::cout << "Summary for column " << col << ":\n";
@@ -171,26 +216,25 @@ namespace Oasis {
         std::cout << "Variance: " << variance(col) << "\n";
         std::cout << "Standard Deviation: " << stddev(col) << "\n";
         std::cout << "Skewness: " << skew(col) << "\n";
+        std::cout << "Kurtosis: " << kurtosis(col) << "\n";
         std::cout << "Lower Quartile: " << lower_quartile(col) << "\n";
         std::cout << "Upper Quartile: " << upper_quartile(col) << "\n";
         std::cout << "Interquartile Range (IQR): " << iqr(col) << "\n";
-        // std::cout << "Kurtosis: " << kurtosis(col) << "\n";
-        // auto modes = mode(col);
-        // std::cout << "Mode: ";
-        // for (const auto& [value, count] : modes) {
-        //     std::cout << value << " (count: " << count << "), ";
-        // }
+        std::cout << "Coefficient of Variation: " << coefficient_variation(col) << "%\n";
+        // std::cout << "Z-Scores: ";
+
+        auto modes = mode(col);
+        std::cout << "Mode: ";
+        for (const auto& value : modes) {
+            std::cout << value << " ";
+        }
         std::cout << "\n";
     }
 
-    template <typename T>
-    std::vector<T> Stats<T>::getColumnData(size_t col) const {
-        size_t rowCount = table.getColSize(col);
-        std::vector<T> data(rowCount);
-        for (size_t row = 0; row < rowCount; ++row) {
-            data[row] = table.get(col, row);
-        }
-        return data;
-    }
-
 } // namespace Oasis
+
+
+// explicit instantiation for required types
+template class Oasis::Stats<int>;
+template class Oasis::Stats<double>;
+template class Oasis::Stats<float>;
