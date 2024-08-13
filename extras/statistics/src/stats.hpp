@@ -69,7 +69,7 @@ public:
 
     [[nodiscard]] double chi_square_test_independence(const std::vector<size_t>& row_groups, const std::vector<size_t>& col_groups) const;
 
-    [[nodiscard]] double chi_square_goodness_of_fit(const std::vector<double>& expected_frequencies) const;
+    [[nodiscard]] double chi_square_goodness_of_fit() const;
 
     void summary(size_t col) const;
 

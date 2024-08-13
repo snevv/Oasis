@@ -191,7 +191,21 @@ namespace Oasis {
         return upper_quartile(col) - lower_quartile(col);
     }
 
-    // Implementations for `lower_limit` and `upper_limit` if needed...
+    // Q1 - 1.5 * IQR
+    template <typename T>
+    auto Stats<T>::lower_limit(size_t col) const {
+        T q1 = lower_quartile(col);
+        T iqr_value = iqr(col);
+        return q1 - 1.5 * iqr_value;
+    }
+
+    // Q3 + 1.5 * IQR
+    template <typename T>
+    auto Stats<T>::upper_limit(size_t col) const {
+        T q3 = upper_quartile(col);
+        T iqr_value = iqr(col);
+        return q3 + 1.5 * iqr_value;
+    }
 
     template <typename T>
     std::vector<T> Stats<T>::getColumnData(size_t col) const {
@@ -203,6 +217,70 @@ namespace Oasis {
         return data;
     }
 
+    // FIND WAY TO IMPORT ACTUAL NORMAL DISTRIBUTION INTO LIBRARY!!!!
+    // TEMP CONFIDENCE_INTERVAL_MEAN IMPLEMENTATION
+
+    template <typename T>
+    std::pair<double, double> Stats<T>::confidence_interval_mean(size_t col, double confidence_level) const {
+        auto data = getColumnData(col);
+        size_t n = data.size();
+        if (n < 2) {
+            throw std::runtime_error("Not enough data to compute confidence interval.");
+        }
+
+        T mean_value = mean(col);
+        T stddev_value = stddev(col);
+
+        double z_score = 1.96;  // 95% confidence level
+        if (confidence_level == 0.99) {
+            z_score = 2.576; // 99% confidence level
+        } else if (confidence_level == 0.90) {
+            z_score = 1.645; // 90% confidence level
+        }
+
+        double margin_of_error = z_score * (stddev_value / std::sqrt(n));
+        return {mean_value - margin_of_error, mean_value + margin_of_error};
+    }
+
+    /* IMPLEMENT FUNCTIONALITY THAT ALLOWS CLIENT TO WHICH COLUMNS 
+     * FROM INPUT WILL BE USED FOR (L1, L2, L3, etc.) like IN TI-84 CALCULATOR
+     */ 
+
+    template <typename T>
+    double Stats<T>::chi_square_goodness_of_fit() const {
+        auto data = getColumnData(0); 
+        auto frequencies = getColumnData(1); // observed frequencies
+        
+        size_t n = frequencies.size();
+        if (n == 0) {
+            throw std::runtime_error("No data available for chi-square test.");
+        }
+
+        double total_observed = std::accumulate(frequencies.begin(), frequencies.end(), 0.0);
+
+        std::vector<double> expected_frequencies(n, total_observed / n);
+
+        // ????
+        if (expected_frequencies.size() != frequencies.size()) {
+            throw std::invalid_argument("Expected and observed frequency counts do not match.");
+        }
+
+        double chi_square_statistic = 0.0;
+
+        for (size_t i = 0; i < n; ++i) {
+            double observed = static_cast<double>(frequencies[i]);
+            double expected = expected_frequencies[i];
+
+            if (expected == 0) {
+                throw std::invalid_argument("Expected frequency cannot be zero.");
+            }
+
+            chi_square_statistic += std::pow(observed - expected, 2) / expected;
+        }
+
+        return chi_square_statistic;
+    }
+    
     template <typename T>
     void Stats<T>::summary(size_t col) const {
         std::cout << "Summary for column " << col << ":\n";
