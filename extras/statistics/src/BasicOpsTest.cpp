@@ -474,3 +474,92 @@ TEST_CASE("Interquartile Range (odd number of elements)", "[Stats]") {
 
     REQUIRE(stats.iqr(0) == 3.5);
 }
+
+TEST_CASE("Kurtosis (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.kurtosis(0), Catch::Matchers::WithinAbs(-1.2, 0.01));
+}
+
+TEST_CASE("Kurtosis (scrambled)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.kurtosis(0), Catch::Matchers::WithinAbs(-1.2, 0.01)); 
+}
+
+TEST_CASE("Kurtosis (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.kurtosis(0), Catch::Matchers::WithinAbs(-1.23, 0.01)); 
+}
+
+TEST_CASE("Kurtosis (empty dataset)", "[Stats]") {
+    std::vector<std::vector<int>> data = {{}};
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(std::isnan(stats.kurtosis(0)));
+}
+
+
+TEST_CASE("Kurtosis (small dataset with negative numbers)", "[Stats]") {
+    std::vector<std::vector<int>> data = {{-5, -10, -15, -20}};
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    double calculated_kurtosis = stats.kurtosis(0);
+    double expected_kurtosis = 1.5;  
+
+    REQUIRE_THAT(calculated_kurtosis, Catch::Matchers::WithinAbs(expected_kurtosis, 0.01)); 
+}
+
+
+TEST_CASE("Z-Score (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.z_score(0, 5.0), Catch::Matchers::WithinAbs(0.0, 0.01)); 
+    REQUIRE_THAT(stats.z_score(0, 1.0), Catch::Matchers::WithinAbs(-1.5, 0.01)); 
+}
+
+TEST_CASE("Z-Score (scrambled)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.z_score(0, 5.0), Catch::Matchers::WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(stats.z_score(0, 1.0), Catch::Matchers::WithinAbs(-1.5, 0.01)); 
+}
+
+TEST_CASE("Z-Score (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.z_score(0, 5.0), Catch::Matchers::WithinAbs(0.0, 0.01)); 
+    REQUIRE_THAT(stats.z_score(0, 1.0), Catch::Matchers::WithinAbs(-1.5, 0.01)); 
+}
+
