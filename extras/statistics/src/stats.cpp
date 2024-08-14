@@ -260,7 +260,7 @@ namespace Oasis {
 
         std::vector<double> expected_frequencies(n, total_observed / n);
 
-        // ????
+        // ???? what to do w this error
         if (expected_frequencies.size() != frequencies.size()) {
             throw std::invalid_argument("Expected and observed frequency counts do not match.");
         }
@@ -276,6 +276,54 @@ namespace Oasis {
             }
 
             chi_square_statistic += std::pow(observed - expected, 2) / expected;
+        }
+
+        return chi_square_statistic;
+    }
+
+    template <typename T>
+    double Stats<T>::chi_square_test_independence(const std::vector<size_t>& row_groups, const std::vector<size_t>& col_groups) const {
+        size_t num_rows = row_groups.size();
+        size_t num_cols = col_groups.size();
+        
+        // throw runtime error or return null?
+        if (num_rows == 0 || num_cols == 0) {
+            throw std::runtime_error("No data available for chi-square test.");
+        }
+
+        std::vector<std::vector<double>> observed(num_rows, std::vector<double>(num_cols, 0));
+        for (size_t i = 0; i < num_rows; ++i) {
+            for (size_t j = 0; j < num_cols; ++j) {
+                observed[i][j] = table.get(row_groups[i], col_groups[j]);
+            }
+        }
+
+        std::vector<double> row_totals(num_rows, 0);
+        std::vector<double> col_totals(num_cols, 0);
+        double total = 0;
+
+        for (size_t i = 0; i < num_rows; ++i) {
+            for (size_t j = 0; j < num_cols; ++j) {
+                row_totals[i] += observed[i][j];
+                col_totals[j] += observed[i][j];
+                total += observed[i][j];
+            }
+        }
+
+        std::vector<std::vector<double>> expected(num_rows, std::vector<double>(num_cols, 0));
+        for (size_t i = 0; i < num_rows; ++i) {
+            for (size_t j = 0; j < num_cols; ++j) {
+                expected[i][j] = (row_totals[i] * col_totals[j]) / total;
+            }
+        }
+
+        double chi_square_statistic = 0;
+        for (size_t i = 0; i < num_rows; ++i) {
+            for (size_t j = 0; j < num_cols; ++j) {
+                if (expected[i][j] != 0) {
+                    chi_square_statistic += std::pow(observed[i][j] - expected[i][j], 2) / expected[i][j];
+                }
+            }
         }
 
         return chi_square_statistic;
@@ -312,7 +360,6 @@ namespace Oasis {
 } // namespace Oasis
 
 
-// explicit instantiation for required types
 template class Oasis::Stats<int>;
 template class Oasis::Stats<double>;
 template class Oasis::Stats<float>;
