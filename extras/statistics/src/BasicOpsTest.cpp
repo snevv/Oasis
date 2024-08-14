@@ -563,3 +563,113 @@ TEST_CASE("Z-Score (odd number of elements)", "[Stats]") {
     REQUIRE_THAT(stats.z_score(0, 1.0), Catch::Matchers::WithinAbs(-1.5, 0.01)); 
 }
 
+TEST_CASE("Upper Quartile (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.upper_quartile(0) == 6);
+}
+
+TEST_CASE("Upper Quartile (scrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.upper_quartile(0) == 6);
+}
+
+TEST_CASE("Upper Quartile (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.upper_quartile(0) == 6);
+}
+
+TEST_CASE("Lower Quartile (normal / unscrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7, 8} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.lower_quartile(0) == 3);
+}
+
+TEST_CASE("Lower Quartile (scrambled)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 1, 3, 8, 5, 2, 6, 4} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.lower_quartile(0) == 3);
+}
+
+TEST_CASE("Lower Quartile (odd number of elements)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5, 6, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.lower_quartile(0) == 2);
+}
+
+TEST_CASE("Coefficient of Variation (normal)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {1, 2, 3, 4, 5} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE_THAT(stats.coefficient_variation(0), Catch::Matchers::WithinAbs(0.527, 0.01));
+}
+
+TEST_CASE("Coefficient of Variation (floats)", "[Stats]") {
+    std::vector<std::vector<double>> data = { {1.1, 2.2, 3.3, 4.4, 5.5} };
+
+    Oasis::Table<double> table;
+    table.setData(data);
+    Oasis::Stats<double> stats(table);
+
+    REQUIRE_THAT(stats.coefficient_variation(0), Catch::Matchers::WithinAbs(0.539, 0.01));
+}
+
+TEST_CASE("Coefficient of Variation (repeated values)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {7, 7, 7, 7, 7} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE_THAT(stats.coefficient_variation(0), Catch::Matchers::WithinAbs(0.0, 0.01));
+}
+
+TEST_CASE("Coefficient of Variation (single value)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {5} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE_THAT(stats.coefficient_variation(0), Catch::Matchers::WithinAbs(0.0, 0.01));
+}
+
+TEST_CASE("Coefficient of Variation (empty)", "[Stats]") {
+    std::vector<std::vector<int>> data = { {} };
+
+    Oasis::Table<int> table;
+    table.setData(data);
+    Oasis::Stats<int> stats(table);
+
+    REQUIRE(stats.coefficient_variation(0) == NULL);
+}
+
