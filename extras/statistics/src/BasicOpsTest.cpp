@@ -672,4 +672,3 @@ TEST_CASE("Coefficient of Variation (empty)", "[Stats]") {
 
     REQUIRE(stats.coefficient_variation(0) == NULL);
 }
-

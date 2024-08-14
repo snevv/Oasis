@@ -63,13 +63,11 @@ public:
 
     [[nodiscard]] double z_test(size_t col, double population_mean) const;
 
-    [[nodiscard]] double t_test(size_t col, double population_mean) const;
-
-    [[nodiscard]] double one_way_anova(const std::vector<size_t>& groups) const;
-
     [[nodiscard]] double chi_square_test_independence(const std::vector<size_t>& row_groups, const std::vector<size_t>& col_groups) const;
 
     [[nodiscard]] double chi_square_goodness_of_fit() const;
+
+    [[nodiscard]] double correlationCoefficient() const;
 
     void summary(size_t col) const;
 

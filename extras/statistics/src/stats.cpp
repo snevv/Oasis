@@ -246,6 +246,9 @@ namespace Oasis {
      * FROM INPUT WILL BE USED FOR (L1, L2, L3, etc.) like IN TI-84 CALCULATOR
      */ 
 
+    /* TODO: decide how to handle errors, currently throwing runtime errors
+     */ 
+
     template <typename T>
     double Stats<T>::chi_square_goodness_of_fit() const {
         auto data = getColumnData(0); 
@@ -288,7 +291,7 @@ namespace Oasis {
         
         // throw runtime error or return null?
         if (num_rows == 0 || num_cols == 0) {
-            throw std::runtime_error("No data available for chi-square test.");
+            throw std::runtime_error("No data available for chi-square test");
         }
 
         std::vector<std::vector<double>> observed(num_rows, std::vector<double>(num_cols, 0));
@@ -327,6 +330,37 @@ namespace Oasis {
         }
 
         return chi_square_statistic;
+    }
+
+    template <typename T>
+    double Stats<T>::correlationCoefficient() const {
+
+        std::vector<T> x = getCol(xCol);
+        std::vector<T> y = getCol(yCol);
+
+        if (x.size() != y.size()) {
+            throw std::logic_error("columns must have the same number of rows");
+        }
+
+        size_t n = x.size();
+        if (n == 0) {
+            throw std::logic_error("columns must not be empty");
+        }
+
+        double sum_x = std::accumulate(x.begin(), x.end(), 0.0);
+        double sum_y = std::accumulate(y.begin(), y.end(), 0.0);
+        double sum_x2 = std::accumulate(x.begin(), x.end(), 0.0, [](double sum, T xi) { return sum + xi * xi; });
+        double sum_y2 = std::accumulate(y.begin(), y.end(), 0.0, [](double sum, T yi) { return sum + yi * yi; });
+        double sum_xy = std::inner_product(x.begin(), x.end(), y.begin(), 0.0);
+
+        double numerator = n * sum_xy - sum_x * sum_y;
+        double denominator = std::sqrt((n * sum_x2 - sum_x * sum_x) * (n * sum_y2 - sum_y * sum_y));
+
+        if (denominator == 0) {
+            throw std::runtime_error("zero denominator");
+        }
+
+        return numerator / denominator;
     }
     
     template <typename T>

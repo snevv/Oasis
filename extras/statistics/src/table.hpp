@@ -47,6 +47,8 @@ public:
 private:
     std::vector<T> values;
     std::vector<T> col_sizes; 
+
+    friend class TableInitializer<T>;
 };
 
 } // namespace Oasis
